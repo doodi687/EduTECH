@@ -1,0 +1,74 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+import GetAvgRating from "../../../utils/avgRating";
+import RatingStars from "../../common/RatingStars";
+import Img from "../../common/Img";
+import { courseThumbnails } from "../../../data/courseThumbnails";
+
+// Course_Card shows a single course. It accepts `index` (from parent) so
+// different cards in the same category can pick different images.
+function Course_Card({ course, Height = "h-[250px]", index = 0 }) {
+  const [avgReviewCount, setAvgReviewCount] = useState(0);
+
+  useEffect(() => {
+    setAvgReviewCount(GetAvgRating(course?.ratingAndReviews || []));
+  }, [course]);
+
+  // Determine category key. Many backends use course.category.name or course.category
+  const categoryKey =
+    (course?.category && (course.category.name || course.category)) ||
+    course?.courseName ||
+    "";
+
+  // Pick thumbnail:
+  // 1) use course.thumbnail if backend provides a full URL,
+  // 2) otherwise pick from courseThumbnails arrays using index modulo length,
+  // 3) otherwise fallback to a default (you can add public/default-course.jpg).
+  let thumbnail = course?.thumbnail || "";
+
+  if (!thumbnail) {
+    const imgs = courseThumbnails[categoryKey] || [];
+    if (imgs.length > 0) {
+      thumbnail = imgs[index % imgs.length];
+    } else {
+      // fallback: put default-course.jpg into frontend/public/ or import one
+      thumbnail = "/default-course.jpg";
+    }
+  }
+
+  return (
+    <div className="hover:scale-[1.03] transition-all duration-200 z-50">
+      <Link to={`/courses/${course?._id || ""}`}>
+        <div className="">
+          <div className="rounded-lg">
+            <Img
+              src={thumbnail}
+              alt={course?.courseName || "Course thumbnail"}
+              className={`${Height} w-full rounded-xl object-cover `}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 px-1 py-3">
+            <p className="text-xl text-richblack-5">{course?.courseName}</p>
+            <p className="text-sm text-richblack-50">
+              {course?.instructor?.firstName} {course?.instructor?.lastName}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-5">{avgReviewCount || 0}</span>
+              <RatingStars Review_Count={avgReviewCount} />
+              <span className="text-richblack-400">
+                {course?.ratingAndReviews?.length || 0} Ratings
+              </span>
+            </div>
+
+            <p className="text-xl text-richblack-5">Rs. {course?.price ?? "Free"}</p>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+}
+
+export default Course_Card;
