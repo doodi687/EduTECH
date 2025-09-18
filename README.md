@@ -1,4 +1,4 @@
-<img height="70" src='./screenshots/Logo-Full-Light.png' />
+# EduTECH (MERN)
 
 # Project Description 📝
 EduTECH is a fully functional ed-tech platform that enables users to create, consume, and rate educational content. <br/>
